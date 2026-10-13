@@ -532,7 +532,12 @@ export const App: React.FC = () => {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 print:p-0">
+      <main
+        id="app-main"
+        className={`flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 print:p-0 ${
+          printModalOpen || riskReportModalOpen ? 'print:hidden' : ''
+        }`}
+      >
         {activeTab === 'dashboard' && (
           <Dashboard
             company={activeCompany}

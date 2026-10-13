@@ -39,8 +39,8 @@ export const RiskReportPrintModal: React.FC<RiskReportPrintModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/70 backdrop-blur-md overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[96vh] flex flex-col border border-slate-200 dark:border-slate-800">
+    <div className="print-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/70 backdrop-blur-md overflow-y-auto print:p-0 print:m-0 print:static print:bg-white">
+      <div className="print-modal-content bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[96vh] flex flex-col border border-slate-200 dark:border-slate-800 print:border-none print:shadow-none print:max-w-none print:max-h-none print:w-full">
         {/* Controls Toolbar (Hidden in print) */}
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-slate-850 rounded-t-2xl print:hidden">
           <div className="flex items-center gap-2">
@@ -108,8 +108,8 @@ export const RiskReportPrintModal: React.FC<RiskReportPrintModalProps> = ({
         </div>
 
         {/* Printable Pages Container */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-200/60 dark:bg-slate-950/80 print:p-0 print:bg-white print:overflow-visible">
-          <div className="max-w-[210mm] mx-auto space-y-8 print:space-y-0 print:max-w-none print:w-full">
+        <div className="print-document-container flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-200/60 dark:bg-slate-950/80 print:p-0 print:bg-white print:overflow-visible">
+          <div className="max-w-[210mm] mx-auto space-y-6 print:space-y-0 print:max-w-none print:w-full">
             {printableDepts.map((dept, deptIdx) => {
               const deptEmployees = employees.filter((e) => e.department === dept.name);
               const noiseEval = evaluateNoiseLevel(dept.noiseLevelDbA);
@@ -131,13 +131,13 @@ export const RiskReportPrintModal: React.FC<RiskReportPrintModalProps> = ({
               return (
                 <div
                   key={dept.id}
-                  className="a4-page bg-white text-slate-900 shadow-xl print:shadow-none p-8 sm:p-10 border border-slate-300 print:border-none rounded-sm min-h-[297mm] flex flex-col justify-between"
+                  className="a4-page bg-white text-slate-900 shadow-xl print:shadow-none p-5 sm:p-7 print:p-0 border border-slate-300 print:border-none rounded-xs flex flex-col justify-between"
                   style={{
                     pageBreakAfter: deptIdx < printableDepts.length - 1 ? 'always' : 'auto',
                     breakAfter: deptIdx < printableDepts.length - 1 ? 'page' : 'auto',
                   }}
                 >
-                  <div className="space-y-4">
+                  <div className="space-y-2">
                     {/* Header */}
                     <div className="border-b-2 border-slate-900 pb-3 flex items-start justify-between gap-4">
                       {/* Logo */}
