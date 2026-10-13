@@ -1,0 +1,6 @@
+{
+  "name": "İSG KKD Zimmet ve Taahhüt Formu Yönetimi",
+  "description": "Türkiye İSG mevzuatına (6331 sayılı Kanun) uygun, profesyonel KKD zimmet tutanağı, taahhütname, görev bazlı KKD matrisi ve katalog yönetim sistemi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
