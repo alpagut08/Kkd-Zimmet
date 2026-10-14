@@ -14,6 +14,7 @@ import {
   CheckSquare,
   Square,
   Layers,
+  FileDown,
 } from 'lucide-react';
 import { Company, DepartmentRiskProfile, Employee, JobRole, PPEAssignment, RiskFactor } from '../types';
 import { formatDateTR, maskTCKN, turkishIncludes, validateTCKN } from '../utils/turkish';
@@ -22,6 +23,7 @@ import {
   exportEmployeesToExcel,
   parseEmployeeFile,
 } from '../utils/excel';
+import { downloadPPEAssignmentWordDoc } from '../utils/wordExport';
 
 interface EmployeeListProps {
   company: Company;
@@ -282,6 +284,29 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
     }
   };
 
+  const [isExportingWord, setIsExportingWord] = useState(false);
+
+  const handleDownloadWordSingle = async (emp: Employee) => {
+    try {
+      await downloadPPEAssignmentWordDoc(company, [emp], assignments, maskTC);
+    } catch (err: any) {
+      alert(`Word dosyası oluşturulurken hata: ${err?.message || err}`);
+    }
+  };
+
+  const handleBulkDownloadWord = async () => {
+    const selected = employees.filter((e) => selectedEmpIds.has(e.id));
+    if (selected.length === 0) return;
+    try {
+      setIsExportingWord(true);
+      await downloadPPEAssignmentWordDoc(company, selected, assignments, maskTC);
+    } catch (err: any) {
+      alert(`Word dosyası oluşturulurken hata: ${err?.message || err}`);
+    } finally {
+      setIsExportingWord(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Action Bar */}
@@ -398,13 +423,22 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                 if (selected.length === 1) onOpenPrintModal(selected[0]);
                 else onOpenPrintModal(undefined); // bulk print
               }}
-              className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 dark:bg-slate-700 text-white font-semibold rounded-lg hover:bg-slate-900 transition shadow-sm"
+              className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 dark:bg-slate-700 text-white font-semibold rounded-lg hover:bg-slate-900 transition shadow-sm cursor-pointer"
             >
-              <FileText className="w-3.5 h-3.5" /> Seçilenleri Toplu Yazdır
+              <FileText className="w-3.5 h-3.5" /> Seçilenleri Toplu Yazdır / PDF
+            </button>
+            <button
+              onClick={handleBulkDownloadWord}
+              disabled={isExportingWord}
+              title="Seçili çalışanların zimmet formlarını tek bir Word (.docx) dosyasında indir"
+              className="flex items-center gap-1 px-3 py-1.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition shadow-sm disabled:opacity-60 cursor-pointer"
+            >
+              <FileDown className="w-3.5 h-3.5" />
+              {isExportingWord ? 'Word İndiriliyor...' : 'Seçilenleri Word (.docx) İndir'}
             </button>
             <button
               onClick={() => setSelectedEmpIds(new Set())}
-              className="text-slate-500 hover:text-slate-700 px-2 py-1"
+              className="text-slate-500 hover:text-slate-700 px-2 py-1 cursor-pointer"
             >
               Seçimi Temizle
             </button>
@@ -567,10 +601,20 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
                             type="button"
                             onClick={() => onOpenPrintModal(emp)}
                             title="Zimmet Tutanağı & Taahhütname Yazdır / PDF"
-                            className="p-1.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg text-xs flex items-center gap-1 transition"
+                            className="p-1.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg text-xs flex items-center gap-1 transition cursor-pointer"
                           >
                             <FileText className="w-3.5 h-3.5" />
                             <span className="hidden sm:inline">Form / PDF</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDownloadWordSingle(emp)}
+                            title="Zimmet Tutanağını Word (.docx) formatında indir"
+                            className="p-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900 text-indigo-700 dark:text-indigo-300 rounded-lg text-xs flex items-center gap-1 transition cursor-pointer"
+                          >
+                            <FileDown className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Word</span>
                           </button>
 
                           <button

@@ -8,9 +8,11 @@ import {
   Square,
   Sliders,
   Sparkles,
+  FileDown,
 } from 'lucide-react';
 import { Company, Employee, PPEAssignment, PPEItem } from '../types';
 import { formatDateTR, generateFormNo, maskTCKN } from '../utils/turkish';
+import { downloadPPEAssignmentWordDoc } from '../utils/wordExport';
 import { SignaturePad } from './SignaturePad';
 
 interface PrintPreviewModalProps {
@@ -40,6 +42,7 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
   const [showDetailedSpecs, setShowDetailedSpecs] = useState(false);
   const [useDigitalSignature, setUseDigitalSignature] = useState(false);
   const [printScale, setPrintScale] = useState<'fit' | '100' | '95' | '90' | '85'>('100');
+  const [isExportingWord, setIsExportingWord] = useState(false);
 
   // Digital Signatures
   const [employeeSignature, setEmployeeSignature] = useState<string>('');
@@ -55,6 +58,17 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
   const printableEmployees = isBulkPrint
     ? employees
     : employees.filter((e) => e.id === selectedEmpId);
+
+  const handleDownloadWord = async () => {
+    try {
+      setIsExportingWord(true);
+      await downloadPPEAssignmentWordDoc(company, printableEmployees, assignments, maskTC);
+    } catch (err: any) {
+      alert(`Word dosyası oluşturulurken hata meydana geldi: ${err?.message || err}`);
+    } finally {
+      setIsExportingWord(false);
+    }
+  };
 
   return (
     <div className="print-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/70 backdrop-blur-md overflow-y-auto print:p-0 print:m-0 print:static print:bg-white">
@@ -73,22 +87,31 @@ export const PrintPreviewModal: React.FC<PrintPreviewModalProps> = ({
                 </span>
               </h3>
               <p className="text-xs text-slate-500">
-                Tarayıcı Yazdırma (Ctrl+P / PDF Olarak Kaydet) taşma yapmadan her personel için tam 1 sayfaya sığdırılır.
+                Tarayıcı Yazdırma (Ctrl+P / PDF) veya düzenlenebilir Microsoft Word (.docx) olarak indirin.
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             <button
+              onClick={handleDownloadWord}
+              disabled={isExportingWord}
+              title="Formu düzenlenebilir Microsoft Word (.docx) belgesi olarak indir"
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-md shadow-indigo-600/30 transition disabled:opacity-60 cursor-pointer"
+            >
+              <FileDown className="w-4 h-4" />
+              {isExportingWord ? 'Word Hazırlanıyor...' : 'Word (.docx) İndir'}
+            </button>
+            <button
               onClick={handlePrint}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow-md shadow-blue-600/30 transition"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow-md shadow-blue-600/30 transition cursor-pointer"
             >
               <Printer className="w-4 h-4" />
               Yazdır / PDF Olarak Kaydet
             </button>
             <button
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800"
+              className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>

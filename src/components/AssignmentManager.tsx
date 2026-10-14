@@ -14,6 +14,7 @@ import {
   X,
   FileText,
   User,
+  FileDown,
 } from 'lucide-react';
 import {
   Company,
@@ -24,6 +25,7 @@ import {
   PPEItem,
 } from '../types';
 import { addMonthsToDate, formatDateTR, getExpiryStatus, getTodayISO } from '../utils/turkish';
+import { downloadPPEAssignmentWordDoc } from '../utils/wordExport';
 
 interface AssignmentManagerProps {
   company: Company;
@@ -69,6 +71,18 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({
   const [trainerName, setTrainerName] = useState(company.authorized.isgExpertName);
   const [trainingDate, setTrainingDate] = useState(getTodayISO());
   const [notes, setNotes] = useState('');
+  const [isExportingWord, setIsExportingWord] = useState(false);
+
+  const handleDownloadWord = async () => {
+    try {
+      setIsExportingWord(true);
+      await downloadPPEAssignmentWordDoc(company, [employee], assignments, false);
+    } catch (err: any) {
+      alert(`Word dosyası oluşturulurken hata: ${err?.message || err}`);
+    } finally {
+      setIsExportingWord(false);
+    }
+  };
 
   // Non-assignment rationale modal for mandatory item removal
   const [removalModalOpen, setRemovalModalOpen] = useState(false);
@@ -389,10 +403,19 @@ export const AssignmentManager: React.FC<AssignmentManagerProps> = ({
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             <button
               onClick={() => onOpenPrintModal(employee)}
-              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 transition"
+              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 transition cursor-pointer"
             >
               <Printer className="w-4 h-4" />
-              Zimmet & Taahhütname Yazdır
+              Zimmet & Taahhütname Yazdır / PDF
+            </button>
+            <button
+              onClick={handleDownloadWord}
+              disabled={isExportingWord}
+              title="Bu çalışanın zimmet tutanağını düzenlenebilir Word (.docx) olarak indir"
+              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20 transition disabled:opacity-60 cursor-pointer"
+            >
+              <FileDown className="w-4 h-4" />
+              {isExportingWord ? 'Word Hazırlanıyor...' : 'Word (.docx) İndir'}
             </button>
             <button
               onClick={onBackToList}
